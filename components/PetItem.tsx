@@ -8,6 +8,8 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { Link } from "expo-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deletePet } from "@/api/pets";
 
 interface PetItemProps {
   pet: {
@@ -18,12 +20,29 @@ interface PetItemProps {
     image: string;
     image2: string;
   };
-  setDisplayPets: (pets: any[]) => void;
-  displayPets: any[];
+  // setDisplayPets: (pets: any[]) => void;
+  // displayPets: any[];
 }
-
-const PetItem = ({ pet, setDisplayPets, displayPets }: PetItemProps) => {
+const PetItem = ({ pet }: PetItemProps) => {
   const [image, setImage] = useState(pet.image);
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: deletePet,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pets"] }); // Re fetch
+    },
+    onError: () => {
+      console.error("deleting failed");
+    },
+  });
+  let buttonText = "Adopt";
+  if (isPending) {
+    buttonText = "Adopting..";
+  }
+
+  // const PetItem = ({ pet, setDisplayPets, displayPets }: PetItemProps) => {
+  //   const [image, setImage] = useState(pet.image);
   return (
     <Link href={`/${pet.id}`} asChild>
       <Pressable style={styles.container}>
@@ -37,20 +56,21 @@ const PetItem = ({ pet, setDisplayPets, displayPets }: PetItemProps) => {
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={styles.petButton}
-            onPress={() => setImage(pet.image2)}
+            style={styles.adoptButton}
+            onPress={() => mutate(pet.id)}
+            disabled={isPending}
           >
-            <Text style={styles.buttonText}>Pet</Text>
+            <Text style={styles.buttonText}>{buttonText}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.adoptButton}
             onPress={() => {
               setDisplayPets(displayPets.filter((p) => p.id !== pet.id));
             }}
           >
             <Text style={styles.buttonText}>Adopt</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </Pressable>
     </Link>

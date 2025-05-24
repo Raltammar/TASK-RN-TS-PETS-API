@@ -48,8 +48,8 @@ const PetList = () => {
       <PetItem
         key={pet.id}
         pet={pet}
-        displayPets={pets}
-        setDisplayPets={() => {}}
+        // displayPets={pets}
+        // setDisplayPets={() => {}}
       />
     ));
 
