@@ -5,14 +5,29 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import React, { useState } from "react";
-import pets from "@/data/pets";
+import React, { useEffect, useState } from "react";
+import Pet from "@/data/types";
+
 import PetItem from "./PetItem";
+import instance from "@/api";
+import { Try } from "expo-router/build/views/Try";
 
 const PetList = () => {
   const [search, setSearch] = useState("");
   const [type, setType] = useState("");
-  const [displayPets, setDisplayPets] = useState(pets);
+  const [displayPets, setDisplayPets] = useState<Pet[]>([]);
+  //fetch all pets
+  useEffect(() => {
+    const fetchPets = async () => {
+      try {
+        const response = await instance.get("/pets");
+        setDisplayPets(response.data);
+      } catch (error) {
+        console.error("Unable to fetch pets", error);
+      }
+    };
+    fetchPets();
+  }, []);
 
   const petList = displayPets
     .filter((pet) => pet.name.toLowerCase().includes(search.toLowerCase()))

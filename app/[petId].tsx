@@ -1,11 +1,44 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
-import pets from "@/data/pets";
+import instance from "@/api";
+import Pet from "@/data/types";
+
+// import pets from "@/data/pets";
 
 const PetDetails = () => {
   const { petId } = useLocalSearchParams();
-  const pet = pets[0];
+  const [pet, setPet] = useState<Pet | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    const fetchPet = async () => {
+      try {
+        const response = await instance.get(`/pets/${petId}`);
+        setPet(response.data);
+      } catch (error) {
+        console.error("FetchinG PeT error !!", error);
+        setError("NOt Found");
+      }
+    };
+    if (petId) {
+      fetchPet();
+    }
+  }, [petId]);
+  if (error) {
+    return (
+      <View>
+        <Text>ERROR</Text>
+      </View>
+    );
+  }
+  if (!pet) {
+    return (
+      <View>
+        <Text>LoaDinG</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.name}>{pet.name}</Text>
