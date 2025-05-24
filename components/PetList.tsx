@@ -10,36 +10,60 @@ import Pet from "@/data/types";
 
 import PetItem from "./PetItem";
 import instance from "@/api";
-import { Try } from "expo-router/build/views/Try";
+import { useQuery } from "@tanstack/react-query";
+import { fetchPets } from "@/api/pets";
 
 const PetList = () => {
   const [search, setSearch] = useState("");
   const [type, setType] = useState("");
-  const [displayPets, setDisplayPets] = useState<Pet[]>([]);
+  // const [displayPets, setDisplayPets] = useState<Pet[]>([]);
   //fetch all pets
-  useEffect(() => {
-    const fetchPets = async () => {
-      try {
-        const response = await instance.get("/pets");
-        setDisplayPets(response.data);
-      } catch (error) {
-        console.error("Unable to fetch pets", error);
-      }
-    };
-    fetchPets();
-  }, []);
+  const {
+    data: pets = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["pets"],
+    queryFn: fetchPets,
+  });
 
-  const petList = displayPets
+  if (isLoading) return <Text>Loading...</Text>;
+  if (error) return <Text>Failed to fetch pets</Text>;
+
+  // useEffect(() => {
+  //   const fetchPets = async () => {
+  //     try {
+  //       const response = await instance.get("/pets");
+  //       setDisplayPets(response.data);
+  //     } catch (error) {
+  //       console.error("Unable to fetch pets", error);
+  //     }
+  //   };
+  //   fetchPets();
+  // }, []);
+  const filteredPets = pets
     .filter((pet) => pet.name.toLowerCase().includes(search.toLowerCase()))
     .filter((pet) => pet.type.toLowerCase().includes(type.toLowerCase()))
     .map((pet) => (
       <PetItem
         key={pet.id}
         pet={pet}
-        setDisplayPets={setDisplayPets}
-        displayPets={displayPets}
+        displayPets={pets}
+        setDisplayPets={() => {}}
       />
     ));
+
+  // const petList = displayPets
+  //   .filter((pet) => pet.name.toLowerCase().includes(search.toLowerCase()))
+  //   .filter((pet) => pet.type.toLowerCase().includes(type.toLowerCase()))
+  //   .map((pet) => (
+  //     <PetItem
+  //       key={pet.id}
+  //       pet={pet}
+  //       setDisplayPets={setDisplayPets}
+  //       displayPets={displayPets}
+  //     />
+  // ));
   return (
     <ScrollView
       contentContainerStyle={styles.container}
@@ -81,7 +105,7 @@ const PetList = () => {
       </ScrollView>
 
       {/* Pet List */}
-      {petList}
+      {filteredPets}
     </ScrollView>
   );
 };
