@@ -1,6 +1,13 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Alert,
+} from "react-native";
 import React, { useEffect, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import instance from "@/api";
 import Pet from "@/data/types";
 
@@ -38,6 +45,32 @@ const PetDetails = () => {
       </View>
     );
   }
+  //  Delete
+  const handleDelete = async () => {
+    try {
+      await instance.delete(`/pets/${petId}`);
+      Alert.alert("Pet deleted!");
+      router.back();
+    } catch (error) {
+      console.error("Delette error:");
+      Alert.alert("Error Pets not delleted");
+    }
+  };
+  if (error) {
+    return (
+      <View>
+        <Text>ERROR</Text>
+      </View>
+    );
+  }
+
+  if (!pet) {
+    return (
+      <View>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -47,7 +80,7 @@ const PetDetails = () => {
       <Text style={styles.type}>Type: {pet.type}</Text>
 
       <View>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleDelete}>
           <Text style={styles.buttonText}>Delete</Text>
         </TouchableOpacity>
       </View>
